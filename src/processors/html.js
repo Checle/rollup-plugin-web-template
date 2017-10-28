@@ -1,10 +1,13 @@
 import {window} from '../index.js'
-import {processURI, getType} from './uri.js'
+import {processURI} from './uri.js'
+import {getType} from '../utils.js'
 
 var babel = require('babel-core')
 var {URL} = require('whatwg-url')
 
-async function processNodes(node, url, imp) {
+async function processNode(root, url, imp) {
+  let node = root
+
   while (true) {
     if (node instanceof window.Element) {
       if (node instanceof window.HTMLScriptElement) {
@@ -13,7 +16,7 @@ async function processNodes(node, url, imp) {
         } else {
           // TODO: transpile single script
 
-          if (type === 'module') {
+          if (node.type === 'module') {
             let u = new URL(node.src, url)
 
             if (u.protocol === 'file:' && u.host === '') {
@@ -48,8 +51,9 @@ async function processNodes(node, url, imp) {
     if (node.firstChild !== null) node = node.firstChild
     else {
       while (node.nextSibling === null) {
+        if (node === root) return
+
         node = node.parentNode
-        if (node === null) return
       }
 
       node = node.nextSibling
@@ -57,7 +61,7 @@ async function processNodes(node, url, imp) {
   }
 }
 
-async function processDocument(document, url, imp) {  
+export async function processDocument(document, url, imp) {  
   let base = document.createElement('base')
   base.href = url
 

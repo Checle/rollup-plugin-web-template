@@ -29,7 +29,6 @@ export default function plugin(options = {}) {
 
     options(options) {
       inputID = realpathSync(options.input)
-      plugins = options.plugins
       type = getType(type, inputID)
       ht = new HTMLTransformer(inputID, type)
     },

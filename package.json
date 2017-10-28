@@ -4,7 +4,11 @@
   "private": true,
   "description": "Compile standard Web apps",
   "main": "dist/rollup-plugin-web-template.js",
-  "dependencies": {},
+  "dependencies": {
+    "datauri": "^1.0.5",
+    "jsdom": "^11.3.0",
+    "whatwg-url": "^6.3.0"
+  },
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-es2016": "^6.24.1",

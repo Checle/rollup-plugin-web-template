@@ -1,6 +1,8 @@
 import code from './code/html/index.js'
 import codeInput from './code/html/input.js'
+import {processDocument} from '../processors/html.js'
 import {window} from '../index.js'
+import {getURL} from '../utils.js'
 
 export default class HTMLTransformer {
   type

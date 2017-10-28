@@ -4,7 +4,6 @@ var {readFile, realpath} = require('fs')
 var {dirname, relative} = require('path').posix
 
 let pathnames = new Set()
-let types = {javascript: 'js', ecmascript: 'js'}
 
 export async function processURI(u, parent, imp, mimeType = null, link = false) {
   parent = new URL(parent)
@@ -32,7 +31,6 @@ export async function processURI(u, parent, imp, mimeType = null, link = false) 
     data = await processCSSText(await getData(pathname, 'utf-8'))
   } else if (type === 'html') {
     data = await processHTMLText(await getData(pathname, 'utf-8'))
-  } else if (type === '')
   } else {
     data = await getData(pathname)
   }

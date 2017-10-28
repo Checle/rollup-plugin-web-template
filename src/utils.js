@@ -1,5 +1,7 @@
-var {isAbsolute, resolve} = require('fs')
+var {isAbsolute, resolve} = require('path')
 var {URL} = require('whatwg-url')
+
+let types = {javascript: 'js', ecmascript: 'js'}
 
 export async function getData(pathname, encoding = null) {
   return await new Promise((resolve, reject) => {
