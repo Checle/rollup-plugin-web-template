@@ -1,0 +1,39 @@
+{
+  "name": "rollup-plugin-web-template",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Compile standard Web apps",
+  "main": "dist/rollup-plugin-web-template.js",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-es2016": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "rollup": "^0.50.0",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0"
+  },
+  "scripts": {
+    "test": "echo \"No tests\"",
+    "lint": "echo \"Not linted\"",
+    "pretest": "npm run build:cjs",
+    "build": "rollup -c -o dist/rollup-plugin-web-template.js -f es",
+    "prepublish": "npm run lint && npm test && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/checle/rollup-plugin-web-template.git"
+  },
+  "keywords": [
+    "rollup",
+    "modules",
+    "images"
+  ],
+  "author": "Filip Dalüge",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/checle/rollup-plugin-web-template/issues"
+  },
+  "homepage": "https://github.com/checle/rollup-plugin-web-template#readme"
+}
