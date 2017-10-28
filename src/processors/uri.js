@@ -1,6 +1,8 @@
+import {getData, getType} from '../utils.js'
+
 var DataURI = require('datauri')
 var {URL} = require('whatwg-url')
-var {readFile, realpath} = require('fs')
+var {realpath} = require('fs')
 var {dirname, relative} = require('path').posix
 
 let pathnames = new Set()
@@ -21,8 +23,8 @@ export async function processURI(u, parent, imp, mimeType = null, link = false) 
 
   imp(pathname)
 
-  if (set.has(pathname)) throw new ReferenceError(`Circular depencency to ${pathname}`)
-  set.add(pathname)
+  if (pathnames.has(pathname)) throw new ReferenceError(`Circular depencency to ${pathname}`)
+  pathnames.add(pathname)
 
   let type = getType(pathname, mimeType)
   let data

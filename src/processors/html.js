@@ -1,16 +1,33 @@
-import {window} from '../index.js'
+import window from '../window.js'
 import {processURI} from './uri.js'
 import {getType} from '../utils.js'
 
 var babel = require('babel-core')
 var {URL} = require('whatwg-url')
 
-async function processNode(root, url, imp) {
+let {DOMParser, XMLSerializer, Text, Element, HTMLScriptElement, HTMLLinkElement} = window
+
+async function processNode(root, url, imp, link) {
   let node = root
 
-  while (true) {
-    if (node instanceof window.Element) {
-      if (node instanceof window.HTMLScriptElement) {
+  function getNext(node) {
+    if (node.firstChild !== null) return node.firstChild
+
+    while (node.nextSibling === null) {
+      if (node === root) return null
+
+      node = node.parentNode
+      if (node === null) return null
+    }
+
+    return node.nextSibling
+  }
+
+  for (let next; node !== null; node = next) {
+    next = getNext(node)
+
+    if (node instanceof Element) {
+      if (node instanceof HTMLScriptElement) {
         if (node.src === null) {
           // TODO: rollup single file
         } else {
@@ -22,60 +39,61 @@ async function processNode(root, url, imp) {
             if (u.protocol === 'file:' && u.host === '') {
               imp(decodeURIComponent(u.pathname))
               node.parentNode.removeChild(node)
+              continue
             }
           }
         }
-      } else if (node instanceof window.HTMLLinkElement && node.rel === 'import') {
+      } else if (node instanceof HTMLLinkElement && node.rel === 'import') {
         if (node.href !== null) {
           let u = new URL(href, url)
 
           if (u.protocol === 'file:' && u.host === '') {
             imp(decodeURIComponent(u.pathname))
             node.parentNode.removeChild(node)
+            continue
           }
         }
-      } else if (node.tagName.indexOf('-') === -1) {
+      }
+
+      if (node.tagName.indexOf('-') === -1) {
         for (let name of ['src', 'href', 'image']) {
-          if (!node.hasOwnProperty(name) || node[name] == null) continue
+          if (node[name] == null || node.tagName === 'BASE') continue
 
           let value = node.getAttribute(name)
           if (value === null) continue
 
-          url = await processURI(value, url, imp, node.type)
+          let uri = await processURI(value, url, imp, node.type, link)
 
           node.setAttribute(name, uri)
         }
       }
-    }
-
-    if (node.firstChild !== null) node = node.firstChild
-    else {
-      while (node.nextSibling === null) {
-        if (node === root) return
-
-        node = node.parentNode
+    } else if (node instanceof window.Text) {
+      if (node.data.length !== 0 && node.data.trim() === '') {
+        if (node.previousSibling instanceof Text && node.previousSibling.data.trim() === '') {
+          node.data = ''
+        } else {
+          node.data = '\n'
+        }
       }
-
-      node = node.nextSibling
     }
   }
 }
 
-export async function processDocument(document, url, imp) {  
-  let base = document.createElement('base')
-  base.href = url
+export async function processDocument(document, url, imp, link) {
+  if (link) {
+    let base = document.createElement('BASE')
+    base.href = url
 
-  document.head.appendChild(base)
+    document.head.appendChild(base)
+  }
 
-  await processNode(document, imp)
+  await processNode(document, url, imp, link)
 }
 
 export default async function processHTMLText(text, url, imp) {
-  let {DOMParser, XMLSerializer} = window
-
   let p = new DOMParser()
   let document = p.parseFromString(text, 'text/html')
-  await processDocument(document, url, imp)
+  await processDocument(document, window, url, imp)
 
   let s = new XMLSerializer()
   return s.serializeToString(document)

@@ -5,19 +5,6 @@ import ImageTransformer from './transformers/image.js'
 import StyleTransformer from './transformers/style.js'
 import {getType} from './utils.js'
 
-var {JSDOM} = require('jsdom')
-var {URL} = require('whatwg-url')
-
-let dom = new JSDOM()
-
-export var {window} = dom
-
-window.XMLSerializer = class XMLSerializer {
-  serializeToString(root) {
-    return dom.serialize(root)
-  }
-}
-
 export default function plugin(options = {}) {
   let {type, link, share, imports} = options
   let it = new ImageTransformer()
@@ -30,24 +17,24 @@ export default function plugin(options = {}) {
     options(options) {
       inputID = realpathSync(options.input)
       type = getType(type, inputID)
-      ht = new HTMLTransformer(inputID, type, imports)
+      ht = new HTMLTransformer(inputID, type, imports, link)
     },
 
     transform(code, id) {
-      let ext = id.substr(id.lastIndexOf('.') + 1)
+      let ext = id.substr(id.lastIndexOf('.'))
 
       switch (ext) {
-        case 'html':
+        case '.html':
         return ht.transform(code, id)
 
-        case 'gif':
-        case 'jpeg':
-        case 'jpg':
-        case 'png':
-        case 'svg':
+        case '.gif':
+        case '.jpeg':
+        case '.jpg':
+        case '.png':
+        case '.svg':
         return it.transform(code, id)
 
-        case 'css':
+        case '.css':
         return st.transform(code, id)
       }
     },

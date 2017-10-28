@@ -1,3 +1,4 @@
+var {readFile} = require('fs')
 var {isAbsolute, resolve} = require('path')
 var {URL} = require('whatwg-url')
 

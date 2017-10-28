@@ -22,7 +22,7 @@
     "test": "echo \"No tests\"",
     "lint": "echo \"Not linted\"",
     "pretest": "npm run build:cjs",
-    "build": "rollup -c -o dist/rollup-plugin-web-template.js -f es",
+    "build": "rollup -c -o dist/rollup-plugin-web-template.js -f cjs",
     "prepublish": "npm run lint && npm test && npm run build"
   },
   "repository": {

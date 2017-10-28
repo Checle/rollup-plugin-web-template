@@ -1,5 +1,3 @@
-import {window} from '../index.js'
-
 var {URL} = require('whatwg-url')
 
 let re = /(["'])(?:\\"|.)?\1|\/\*[\s\S]*?\*\/|(@import\s+|[:\s]url\(\s*)(?:(["']?)((?:\\[\s\S]|.)*)\3|([^);]))/g

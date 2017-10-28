@@ -1,7 +1,7 @@
+import window from '../window.js'
 import code from './code/html/index.js'
 import codeInput from './code/html/input.js'
 import {processDocument} from '../processors/html.js'
-import {window} from '../index.js'
 import {getURL} from '../utils.js'
 
 export default class HTMLTransformer {
@@ -10,17 +10,18 @@ export default class HTMLTransformer {
   inputID
   inputDocument = null
 
-  constructor (inputID, type = 'html', imports = []) {
+  constructor (inputID, type = 'html', imports = [], link = false) {
     this.inputID = inputID
     this.type = type
-    thos.imports = imports
+    this.imports = imports
+    this.link = link
   }
 
   async transform(html, id) {
     let imports = []
     let url = getURL(id)
     let document = new window.DOMParser().parseFromString(html, 'text/html')
-    await processDocument(document, url.href, id => imports.push(id))
+    await processDocument(document, url.href, childID => id !== childID && imports.push(childID), this.link)
 
     if (id === this.inputID) {
       this.inputDocument = document
@@ -34,7 +35,7 @@ export default class HTMLTransformer {
       }
     }
 
-    html = new window.XMLSerializer.serializeToString(document)
+    html = new window.XMLSerializer().serializeToString(document)
     return code(html, imports)
   }
 
@@ -45,7 +46,7 @@ export default class HTMLTransformer {
       if (document === null) document = new window.DOMParser().parseFromString('', 'text/html')
 
       if (format === 'iife' || format === 'module') {
-        let script = document.createElement('script')
+        let script = document.createElement('SCRIPT')
 
         if (format === 'module') script.setAttribute('type', 'module')
         else script.setAttribute('defer', '')
