@@ -6,12 +6,14 @@ import {getURL} from '../utils.js'
 
 export default class HTMLTransformer {
   type
+  imports
   inputID
   inputDocument = null
 
-  constructor (inputID, type = 'html') {
+  constructor (inputID, type = 'html', imports = []) {
     this.inputID = inputID
     this.type = type
+    thos.imports = imports
   }
 
   async transform(html, id) {
@@ -23,7 +25,7 @@ export default class HTMLTransformer {
     if (id === this.inputID) {
       this.inputDocument = document
 
-      imports.unshift(__dirname + '/web-template.js') // TODO: check if referenced
+      imports = this.imports.concat(imports)
 
       if (this.type === 'js') {
         return codeInputJS(html, imports)

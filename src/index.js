@@ -19,7 +19,7 @@ window.XMLSerializer = class XMLSerializer {
 }
 
 export default function plugin(options = {}) {
-  let {type, link, share} = options
+  let {type, link, share, imports} = options
   let it = new ImageTransformer()
   let st = new StyleTransformer()
   let inputID, ht
@@ -30,7 +30,7 @@ export default function plugin(options = {}) {
     options(options) {
       inputID = realpathSync(options.input)
       type = getType(type, inputID)
-      ht = new HTMLTransformer(inputID, type)
+      ht = new HTMLTransformer(inputID, type, imports)
     },
 
     transform(code, id) {
