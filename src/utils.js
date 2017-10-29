@@ -29,8 +29,20 @@ export function getURL(id, parentID) {
   return new URL(encodeURIComponent(id).replace(/%2F/g, '/'), 'file:///')
 }
 
+export function getLocalPathname(url, parent) {
+  url = new URL(url, parent)
+
+  if (url.protocol === 'file:' && url.host === '') {
+    return decodeURIComponent(url.pathname)
+  }
+}
+
 export function escapeText(text) {
   return text.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+export function escapeCode(code) {
+  return `/*<!--*/${code}\n/*-->*/`
 }
 
 export function first(a, ...args) {

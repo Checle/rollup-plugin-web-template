@@ -1,46 +1,48 @@
-var {realpathSync} = require('fs')
-
-import HTMLTransformer from './transformers/html.js'
-import ImageTransformer from './transformers/image.js'
-import StyleTransformer from './transformers/style.js'
+import Transformer from './transformer.js'
 import {getType} from './utils.js'
 
-export default function plugin(options = {}) {
-  let {type, link, share, imports} = options
-  let it = new ImageTransformer()
-  let st = new StyleTransformer()
-  let inputID, ht
+var {realpathSync} = require('fs')
+
+let currentTransformer
+
+let i = 0
+
+export default function Plugin(options = {}) {
+  let {type, link, imports, includes, excludes} = options
+  let transformer = new Transformer(imports, link, includes, excludes)
+  let id
+  let j = i++
 
 	return {
 		name: 'web-template',
 
     options(options) {
-      inputID = realpathSync(options.input)
-      type = getType(type, inputID)
-      ht = new HTMLTransformer(inputID, type, imports, link)
+      if (currentTransformer === transformer) return
+
+      id = realpathSync(options.input)
+
+      transformer.config(id, options.plugins)
     },
 
-    transform(code, id) {
-      let ext = id.substr(id.lastIndexOf('.'))
+    async transform(code, id) {
+      if (currentTransformer === transformer) return
 
-      switch (ext) {
-        case '.html':
-        return ht.transform(code, id)
+      let lastTransformer = currentTransformer
+      currentTransformer = transformer
 
-        case '.gif':
-        case '.jpeg':
-        case '.jpg':
-        case '.png':
-        case '.svg':
-        return it.transform(code, id)
-
-        case '.css':
-        return st.transform(code, id)
+      try {
+        return await transformer.transform(code, id)
+      } finally {
+        currentTransformer = lastTransformer
       }
     },
 
-    transformBundle(code, format) {
-      return ht.transformBundle(code, format)
+    transformBundle(code, options) {
+      if (currentTransformer === transformer) return
+
+      let {format} = options
+
+      return transformer.transformBundle(code, currentTransformer ? 'js' : getType(type, id), format)
     },
   }
 }
