@@ -28,6 +28,9 @@ export default class Processor {
   }
 
   async processNode(root, url) {
+    url = new URL(url)
+
+    let pathname = decodeURIComponent(url.pathname)
     let node = root
 
     let getNext = node => {
@@ -49,7 +52,7 @@ export default class Processor {
       for (let plugin of this.transformer.plugins) {
         if (!plugin.resolveId) continue
 
-        let result = await plugin.resolveId(value, url)
+        let result = await plugin.resolveId(value, pathname)
         if (result != null) return result
       }
 
@@ -65,7 +68,7 @@ export default class Processor {
           if (node.src === null) {
             let text
             if (node.type === 'module') text = this.processModuleText(node.innerHTML, url)
-            else text = this.processScriptText(node.innerHTML, url)
+            else text = this.processScriptText(node.innerHTML, `\0${url.pathname}#.js`)
 
             node.innerHTML = escapeCode(text)
             node.removeAttribute('src')
@@ -140,11 +143,7 @@ export default class Processor {
     return s.serializeToString(document)
   }
 
-  async processScriptText(text, url) {
-    url = new URL(url)
-
-    let id = decodeURIComponent(url.pathname)
-
+  async processScriptText(text, id) {
     for (let plugin of this.transformer.plugins) {
       if (plugin.transform) {
         let result = await plugin.transform(text, id)
@@ -155,10 +154,10 @@ export default class Processor {
     return text
   }
 
-  async processModuleText(text, url) {
+  async processModuleText(text, id) {
     let ast = acorn.parse(text, {sourceType: 'module'})
 
-    text = this.processScriptText(text, url)
+    text = this.processScriptText(text, id)
 
     ast.body = ast.body.map(node => {
       if (node.startsWith('Export')) return node.declaration
@@ -217,26 +216,30 @@ export default class Processor {
     pathname = await new Promise((resolve, reject) => realpath(pathname, (error, pathname) => error ? reject(error) : resolve(pathname)))
     type = getType(type, pathname)
 
+    let ext = pathname.substr(pathname.lastIndexOf('.') + 1)
+
     if (pathnames.has(pathname)) throw new ReferenceError(`Circular depencency to ${pathname}`)
 
     pathnames.add(pathname)
 
     try {
-      if (type !== 'js') this.import(pathname) // TODO: Replace by dependency when implemented in rollup
+      if (ext !== 'js') this.import(pathname) // TODO: Replace by dependency when implemented in rollup
 
       let data
 
-      if (type === 'css') {
+      if (ext === 'css') {
         data = await this.processCSSText(await getData(pathname, 'utf-8'), parent)
-      } else if (type === 'html') {
+      } else if (ext === 'html') {
         data = await this.processHTMLText(await getData(pathname, 'utf-8'), parent)
-      } else if (type === 'js') {
-        data = await this.processScriptText(await getData(pathname, 'utf-8'), parent)
-      } else if (type === 'module') {
-        data = await this.processModuleText(await getData(pathname, 'utf-8'), parent)
+      } else if (ext === 'js') {
+        data = await this.processScriptText(await getData(pathname, 'utf-8'), pathname)
+      } else if (ext === 'module') {
+        data = await this.processModuleText(await getData(pathname, 'utf-8'), pathname)
       } else {
         data = await getData(pathname)
       }
+
+      data = this.transformer.format(data, ext, type)
 
       let du = new DataURI()
       du.format(pathname, data)

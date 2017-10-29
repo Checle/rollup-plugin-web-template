@@ -107,6 +107,16 @@ export default class Transformer {
     return codeHTML(html, imports)
   }
 
+  format(code, from, to) {
+    if (from !== to) {
+      if (from === 'html') {
+        if (to === 'js') return codeHTMLForJS(code)
+      }
+    }
+
+    return code
+  }
+
   transformBundle(code, type, format) {
     let document = this.document
     let script
@@ -132,8 +142,8 @@ export default class Transformer {
       let html = new window.XMLSerializer().serializeToString(document)
 
       if (script !== undefined) document.head.removeChild(script)
-      if (type === 'js') return codeHTMLForJS(html)
-      else return html
+
+      return this.format(html, 'html', type)
     }
   }
 }

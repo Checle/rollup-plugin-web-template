@@ -22,7 +22,8 @@ export default {
     wt({
       type: 'html', // Output type; one of 'html', 'js', 'module'
       link: false, // Bundle all files
-      share: [], // Loosely link files from these directories
+      includes: [], // Bundle files in these paths
+      excludes: [], // Link files in these paths as URL
       imports: [], // Modules to import
     }),
   ],

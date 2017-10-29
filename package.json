@@ -21,7 +21,7 @@
   "scripts": {
     "test": "echo \"No tests\"",
     "lint": "echo \"Not linted\"",
-    "pretest": "npm run build:cjs",
+    "pretest": "npm run build",
     "build": "rollup -c -o dist/rollup-plugin-web-template.js -f cjs",
     "watch": "rollup -c -o dist/rollup-plugin-web-template.js -f cjs -w",
     "prepublish": "npm run lint && npm test && npm run build"
