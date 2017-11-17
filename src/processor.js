@@ -94,7 +94,7 @@ export default class Processor {
             }
           }
         } else if (node instanceof HTMLTemplateElement) {
-          this.processNode(node.content, url)
+          await this.processNode(node.content, url)
         }
 
         if (node.tagName.indexOf('-') === -1) {
@@ -228,9 +228,9 @@ export default class Processor {
       let data
 
       if (ext === 'css') {
-        data = await this.processCSSText(await getData(pathname, 'utf-8'), parent)
+        data = await this.processCSSText(await getData(pathname, 'utf-8'), u.href)
       } else if (ext === 'html') {
-        data = await this.processHTMLText(await getData(pathname, 'utf-8'), parent)
+        data = await this.processHTMLText(await getData(pathname, 'utf-8'), u.href)
       } else if (ext === 'js') {
         data = await this.processScriptText(await getData(pathname, 'utf-8'), pathname)
       } else if (ext === 'module') {
@@ -242,7 +242,7 @@ export default class Processor {
       data = this.transformer.format(data, ext, type)
 
       let du = new DataURI()
-      du.format(pathname, data)
+      du.format('.' + type, data)
       return du.content + u.search + u.hash
     } finally {
       pathnames.delete(pathname)

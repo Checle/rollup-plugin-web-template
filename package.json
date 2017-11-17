@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-web-template",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Compile standard Web apps",
   "main": "dist/rollup-plugin-web-template.js",
   "dependencies": {
